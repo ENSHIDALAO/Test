@@ -1,4 +1,4 @@
-local Players = game:GetService("Players")
+loadstring([==[local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
 local TeleportService = game:GetService("TeleportService")
 local RunService = game:GetService("RunService")
@@ -326,4 +326,4 @@ return {
     EnableSecurity = function() SECURITY_ENABLED = true end,
     DisableSecurity = function() SECURITY_ENABLED = false end,
     GetDetectionCount = function() return DETECTION_COUNT end
-}
+}]==])()
