@@ -1,422 +1,432 @@
 loadstring([==[-- WindUI.lua
-local WindUI = {}
+--[[
+     _      ___         ____  ______
+    | | /| / (_)__  ___/ / / / /  _/
+    | |/ |/ / / _ \/ _  / /_/ // /  
+    |__/|__/_/_//_/\_,_/\____/___/
+    
+    by .ftgs#0 (Discord)
+    
+    This script is NOT intended to be modified.
+    To view the source code, see the 'Src' folder on the official GitHub repository.
+    
+    Author: .ftgs#0 (Discord User)
+    Github: https://github.com/Footagesus/WindUI
+    Discord: https://discord.gg/84CNGY5wAV
+]]
 
--- 颜色配置
-WindUI.Colors = {
-    Background = Color3.fromRGB(25, 25, 35),
-    Primary = Color3.fromRGB(0, 120, 215),
-    Secondary = Color3.fromRGB(45, 45, 55),
-    Text = Color3.fromRGB(240, 240, 240),
-    Success = Color3.fromRGB(76, 175, 80),
-    Warning = Color3.fromRGB(255, 152, 0),
-    Error = Color3.fromRGB(244, 67, 54),
-    Border = Color3.fromRGB(60, 60, 70),
-    Hover = Color3.fromRGB(35, 35, 45)
-}
+local WindUI = {cache = {}}
 
--- 基础元素类
-function WindUI:CreateElement(type, properties)
-    local element = Instance.new(type)
-    for property, value in pairs(properties) do
-        element[property] = value
+function WindUI.load(b)
+    if not WindUI.cache[b] then
+        WindUI.cache[b] = {c = WindUI[b]()}
     end
-    return element
+    return WindUI.cache[b].c
 end
 
--- 创建主窗口
-function WindUI:CreateWindow(title, size)
-    local screenGui = self:CreateElement("ScreenGui", {
-        Name = "DeltaXUI",
-        ResetOnSpawn = false,
-        ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    })
+-- 核心UI组件
+function WindUI.a()
+    local b = game:GetService("RunService")
+    local d = b.Heartbeat
+    local e = game:GetService("UserInputService")
+    local f = game:GetService("TweenService")
+    
+    local j = {
+        Font = "rbxassetid://12187365364",
+        CanDraggable = true,
+        Signals = {},
+        Objects = {},
+        DefaultProperties = {
+            ScreenGui = {
+                ResetOnSpawn = false,
+                ZIndexBehavior = "Sibling",
+            },
+            Frame = {
+                BorderSizePixel = 0,
+                BackgroundColor3 = Color3.new(1, 1, 1),
+            },
+            TextLabel = {
+                BackgroundColor3 = Color3.new(1, 1, 1),
+                BorderSizePixel = 0,
+                Text = "",
+                RichText = true,
+                TextColor3 = Color3.new(1, 1, 1),
+                TextSize = 14,
+            },
+            TextButton = {
+                BackgroundColor3 = Color3.new(1, 1, 1),
+                BorderSizePixel = 0,
+                Text = "",
+                AutoButtonColor = false,
+                TextColor3 = Color3.new(1, 1, 1),
+                TextSize = 14,
+            }
+        },
+        Colors = {
+            Red = "#e53935",
+            Orange = "#f57c00",
+            Green = "#43a047",
+            Blue = "#039be5",
+            White = "#ffffff",
+            Grey = "#484848",
+        },
+    }
 
-    local mainFrame = self:CreateElement("Frame", {
-        Size = size or UDim2.new(0, 400, 0, 500),
-        Position = UDim2.new(0.5, -200, 0.5, -250),
-        BackgroundColor3 = self.Colors.Background,
-        BorderColor3 = self.Colors.Border,
-        BorderSizePixel = 1,
-        ClipsDescendants = true
-    })
+    -- 主题配置
+    j.Themes = {
+        Dark = {
+            Name = "Dark",
+            Accent = "#18181b",
+            Dialog = "#161616",
+            Outline = "#FFFFFF",
+            Text = "#FFFFFF",
+            Placeholder = "#999999",
+            Background = "#101010",
+            Button = "#52525b",
+            Icon = "#a1a1aa",
+        }
+    }
+    
+    j.Theme = j.Themes.Dark
 
-    local titleBar = self:CreateElement("Frame", {
-        Size = UDim2.new(1, 0, 0, 30),
-        BackgroundColor3 = self.Colors.Primary,
-        BorderSizePixel = 0
-    })
+    function j.Init(l)
+        -- 初始化函数
+    end
 
-    local titleText = self:CreateElement("TextLabel", {
-        Size = UDim2.new(1, -60, 1, 0),
-        Position = UDim2.new(0, 10, 0, 0),
-        BackgroundTransparency = 1,
-        Text = title or "DeltaX Injector",
-        TextColor3 = self.Colors.Text,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        Font = Enum.Font.GothamBold,
-        TextSize = 14
-    })
+    function j.New(l, m, p)
+        local r = Instance.new(l)
+        for u, v in next, j.DefaultProperties[l] or {} do
+            r[u] = v
+        end
+        for x, z in next, m or {} do
+            r[x] = z
+        end
+        for A, B in next, p or {} do
+            B.Parent = r
+        end
+        return r
+    end
 
-    local closeButton = self:CreateElement("TextButton", {
-        Size = UDim2.new(0, 30, 1, 0),
-        Position = UDim2.new(1, -30, 0, 0),
-        BackgroundColor3 = self.Colors.Error,
-        BorderSizePixel = 0,
-        Text = "X",
-        TextColor3 = self.Colors.Text,
-        Font = Enum.Font.GothamBold,
-        TextSize = 14
-    })
+    function j.Tween(l, m, p, ...)
+        return f:Create(l, TweenInfo.new(m, ...), p)
+    end
 
-    local contentFrame = self:CreateElement("ScrollingFrame", {
-        Size = UDim2.new(1, -20, 1, -50),
-        Position = UDim2.new(0, 10, 0, 40),
-        BackgroundTransparency = 1,
-        BorderSizePixel = 0,
-        ScrollBarThickness = 4,
-        ScrollBarImageColor3 = self.Colors.Primary,
-        CanvasSize = UDim2.new(0, 0, 0, 0),
-        AutomaticCanvasSize = Enum.AutomaticSize.Y
-    })
+    function j.NewRoundFrame(l, m, p, r, x)
+        local z = j.New(x and "ImageButton" or "ImageLabel", {
+            Image = m == "Squircle" and "rbxassetid://80999662900595" or
+                     m == "SquircleOutline" and "rbxassetid://117788349049947",
+            ScaleType = "Slice",
+            SliceCenter = Rect.new(256, 256, 256, 256),
+            SliceScale = 1,
+            BackgroundTransparency = 1,
+        }, r)
 
-    -- 组装元素
-    titleBar.Parent = mainFrame
-    titleText.Parent = titleBar
-    closeButton.Parent = titleBar
-    contentFrame.Parent = mainFrame
-    mainFrame.Parent = screenGui
+        for A, B in pairs(p or {}) do
+            z[A] = B
+        end
+        return z
+    end
 
-    -- 拖拽功能
-    local dragging = false
-    local dragInput, dragStart, startPos
-
-    titleBar.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true
-            dragStart = input.Position
-            startPos = mainFrame.Position
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    dragging = false
+    function j.Drag(p, r, x)
+        local z, A, B, C, F
+        local G = {CanDraggable = true}
+        
+        if not r or type(r) ~= "table" then
+            r = {p}
+        end
+        
+        for H, J in pairs(r) do
+            J.InputBegan:Connect(function(L)
+                if (L.UserInputType == Enum.UserInputType.MouseButton1 or L.UserInputType == Enum.UserInputType.Touch) and G.CanDraggable then
+                    z = J
+                    A = true
+                    C = L.Position
+                    F = p.Position
+                    
+                    L.Changed:Connect(function()
+                        if L.UserInputState == Enum.UserInputState.End then
+                            A = false
+                            z = nil
+                        end
+                    end)
+                end
+            end)
+            
+            J.InputChanged:Connect(function(L)
+                if z == J and A then
+                    if L.UserInputType == Enum.UserInputType.MouseMovement or L.UserInputType == Enum.UserInputType.Touch then
+                        B = L
+                    end
                 end
             end)
         end
-    end)
-
-    titleBar.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement then
-            dragInput = input
-        end
-    end)
-
-    game:GetService("UserInputService").InputChanged:Connect(function(input)
-        if input == dragInput and dragging then
-            local delta = input.Position - dragStart
-            mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, 
-                                         startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-        end
-    end)
-
-    -- 关闭按钮功能
-    closeButton.MouseButton1Click:Connect(function()
-        screenGui:Destroy()
-    end)
-
-    return {
-        ScreenGui = screenGui,
-        MainFrame = mainFrame,
-        ContentFrame = contentFrame,
-        Close = function()
-            screenGui:Destroy()
-        end
-    }
-end
-
--- 创建按钮
-function WindUI:CreateButton(text, callback)
-    local button = self:CreateElement("TextButton", {
-        Size = UDim2.new(1, 0, 0, 40),
-        BackgroundColor3 = self.Colors.Secondary,
-        BorderColor3 = self.Colors.Border,
-        BorderSizePixel = 1,
-        Text = text,
-        TextColor3 = self.Colors.Text,
-        Font = Enum.Font.Gotham,
-        TextSize = 12,
-        AutoButtonColor = false
-    })
-
-    local corner = self:CreateElement("UICorner", {
-        CornerRadius = UDim.new(0, 4)
-    })
-    corner.Parent = button
-
-    -- 悬停效果
-    button.MouseEnter:Connect(function()
-        game:GetService("TweenService"):Create(button, TweenInfo.new(0.2), {
-            BackgroundColor3 = self.Colors.Hover
-        }):Play()
-    end)
-
-    button.MouseLeave:Connect(function()
-        game:GetService("TweenService"):Create(button, TweenInfo.new(0.2), {
-            BackgroundColor3 = self.Colors.Secondary
-        }):Play()
-    end)
-
-    -- 点击效果
-    button.MouseButton1Click:Connect(function()
-        if callback then
-            callback()
-        end
-    end)
-
-    return button
-end
-
--- 创建标签
-function WindUI:CreateLabel(text, size)
-    local label = self:CreateElement("TextLabel", {
-        Size = size or UDim2.new(1, 0, 0, 20),
-        BackgroundTransparency = 1,
-        Text = text,
-        TextColor3 = self.Colors.Text,
-        Font = Enum.Font.Gotham,
-        TextSize = 12,
-        TextXAlignment = Enum.TextXAlignment.Left
-    })
-
-    return label
-end
-
--- 创建切换开关
-function WindUI:CreateToggle(text, default, callback)
-    local toggleFrame = self:CreateElement("Frame", {
-        Size = UDim2.new(1, 0, 0, 30),
-        BackgroundTransparency = 1
-    })
-
-    local label = self:CreateElement("TextLabel", {
-        Size = UDim2.new(0.7, 0, 1, 0),
-        BackgroundTransparency = 1,
-        Text = text,
-        TextColor3 = self.Colors.Text,
-        Font = Enum.Font.Gotham,
-        TextSize = 12,
-        TextXAlignment = Enum.TextXAlignment.Left
-    })
-
-    local toggleButton = self:CreateElement("TextButton", {
-        Size = UDim2.new(0, 40, 0, 20),
-        Position = UDim2.new(1, -40, 0.5, -10),
-        BackgroundColor3 = default and self.Colors.Success or self.Colors.Secondary,
-        BorderSizePixel = 0,
-        Text = "",
-        AutoButtonColor = false
-    })
-
-    local toggleCircle = self:CreateElement("Frame", {
-        Size = UDim2.new(0, 16, 0, 16),
-        Position = default and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8),
-        BackgroundColor3 = self.Colors.Text,
-        BorderSizePixel = 0
-    })
-
-    local corner1 = self:CreateElement("UICorner", {
-        CornerRadius = UDim.new(0, 10)
-    })
-    local corner2 = self:CreateElement("UICorner", {
-        CornerRadius = UDim.new(1, 0)
-    })
-
-    corner1.Parent = toggleButton
-    corner2.Parent = toggleCircle
-
-    label.Parent = toggleFrame
-    toggleButton.Parent = toggleFrame
-    toggleCircle.Parent = toggleButton
-
-    local isToggled = default or false
-
-    toggleButton.MouseButton1Click:Connect(function()
-        isToggled = not isToggled
         
-        game:GetService("TweenService"):Create(toggleCircle, TweenInfo.new(0.2), {
-            Position = isToggled and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)
-        }):Play()
+        e.InputChanged:Connect(function(L)
+            if L == B and A and z ~= nil then
+                if G.CanDraggable then
+                    local J = L.Position - C
+                    j.Tween(p, 0.02, {
+                        Position = UDim2.new(F.X.Scale, F.X.Offset + J.X, F.Y.Scale, F.Y.Offset + J.Y)
+                    }):Play()
+                end
+            end
+        end)
         
-        game:GetService("TweenService"):Create(toggleButton, TweenInfo.new(0.2), {
-            BackgroundColor3 = isToggled and self.Colors.Success or self.Colors.Secondary
-        }):Play()
-        
-        if callback then
-            callback(isToggled)
-        end
-    end)
-
-    return {
-        Frame = toggleFrame,
-        SetState = function(state)
-            isToggled = state
-            toggleCircle.Position = state and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)
-            toggleButton.BackgroundColor3 = state and self.Colors.Success or self.Colors.Secondary
-        end,
-        GetState = function()
-            return isToggled
-        end
-    }
-end
-
--- 创建滑块
-function WindUI:CreateSlider(text, min, max, default, callback)
-    local sliderFrame = self:CreateElement("Frame", {
-        Size = UDim2.new(1, 0, 0, 50),
-        BackgroundTransparency = 1
-    })
-
-    local label = self:CreateElement("TextLabel", {
-        Size = UDim2.new(1, 0, 0, 20),
-        BackgroundTransparency = 1,
-        Text = text,
-        TextColor3 = self.Colors.Text,
-        Font = Enum.Font.Gotham,
-        TextSize = 12,
-        TextXAlignment = Enum.TextXAlignment.Left
-    })
-
-    local valueLabel = self:CreateElement("TextLabel", {
-        Size = UDim2.new(0, 40, 0, 20),
-        Position = UDim2.new(1, -40, 0, 0),
-        BackgroundTransparency = 1,
-        Text = tostring(default),
-        TextColor3 = self.Colors.Text,
-        Font = Enum.Font.Gotham,
-        TextSize = 12,
-        TextXAlignment = Enum.TextXAlignment.Right
-    })
-
-    local track = self:CreateElement("Frame", {
-        Size = UDim2.new(1, 0, 0, 4),
-        Position = UDim2.new(0, 0, 1, -10),
-        BackgroundColor3 = self.Colors.Secondary,
-        BorderSizePixel = 0
-    })
-
-    local fill = self:CreateElement("Frame", {
-        Size = UDim2.new((default - min) / (max - min), 0, 1, 0),
-        BackgroundColor3 = self.Colors.Primary,
-        BorderSizePixel = 0
-    })
-
-    local thumb = self:CreateElement("TextButton", {
-        Size = UDim2.new(0, 16, 0, 16),
-        Position = UDim2.new((default - min) / (max - min), -8, 0.5, -8),
-        BackgroundColor3 = self.Colors.Text,
-        BorderSizePixel = 0,
-        Text = "",
-        AutoButtonColor = false
-    })
-
-    local corner1 = self:CreateElement("UICorner", {
-        CornerRadius = UDim.new(0, 2)
-    })
-    local corner2 = self:CreateElement("UICorner", {
-        CornerRadius = UDim.new(1, 0)
-    })
-
-    corner1.Parent = track
-    corner2.Parent = thumb
-
-    fill.Parent = track
-    thumb.Parent = track
-    track.Parent = sliderFrame
-    label.Parent = sliderFrame
-    valueLabel.Parent = sliderFrame
-
-    local isDragging = false
-    local currentValue = default
-
-    local function updateValue(value)
-        currentValue = math.clamp(value, min, max)
-        local ratio = (currentValue - min) / (max - min)
-        
-        fill.Size = UDim2.new(ratio, 0, 1, 0)
-        thumb.Position = UDim2.new(ratio, -8, 0.5, -8)
-        valueLabel.Text = tostring(math.floor(currentValue))
-        
-        if callback then
-            callback(currentValue)
-        end
+        return G
     end
 
-    thumb.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            isDragging = true
-        end
-    end)
-
-    thumb.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            isDragging = false
-        end
-    end)
-
-    game:GetService("UserInputService").InputChanged:Connect(function(input)
-        if isDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local mousePos = game:GetService("UserInputService"):GetMouseLocation()
-            local trackPos = track.AbsolutePosition
-            local trackSize = track.AbsoluteSize
-            local relativeX = math.clamp((mousePos.X - trackPos.X) / trackSize.X, 0, 1)
-            local value = min + (max - min) * relativeX
-            updateValue(value)
-        end
-    end)
-
-    return {
-        Frame = sliderFrame,
-        SetValue = updateValue,
-        GetValue = function()
-            return currentValue
-        end
-    }
+    return j
 end
 
--- 创建选项卡
-function WindUI:CreateTab(text)
-    local tabButton = self:CreateElement("TextButton", {
-        Size = UDim2.new(0, 80, 0, 30),
-        BackgroundColor3 = self.Colors.Secondary,
-        BorderSizePixel = 0,
-        Text = text,
-        TextColor3 = self.Colors.Text,
-        Font = Enum.Font.Gotham,
-        TextSize = 12,
-        AutoButtonColor = false
-    })
+-- 窗口创建
+function WindUI.b()
+    local b = WindUI.load("a")
+    
+    function b:CreateWindow(title, size)
+        local screenGui = b.New("ScreenGui", {
+            Name = "DeltaXUI",
+            ResetOnSpawn = false,
+            ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+        })
+        
+        local mainFrame = b.New("Frame", {
+            Size = size or UDim2.new(0, 400, 0, 500),
+            Position = UDim2.new(0.5, -200, 0.5, -250),
+            BackgroundColor3 = Color3.fromHex(b.Theme.Background),
+            BorderColor3 = Color3.fromHex(b.Theme.Outline),
+            BorderSizePixel = 1,
+            ClipsDescendants = true
+        })
+        
+        local titleBar = b.New("Frame", {
+            Size = UDim2.new(1, 0, 0, 30),
+            BackgroundColor3 = Color3.fromHex(b.Theme.Accent),
+            BorderSizePixel = 0
+        })
+        
+        local titleText = b.New("TextLabel", {
+            Size = UDim2.new(1, -60, 1, 0),
+            Position = UDim2.new(0, 10, 0, 0),
+            BackgroundTransparency = 1,
+            Text = title or "DeltaX Injector",
+            TextColor3 = Color3.fromHex(b.Theme.Text),
+            TextXAlignment = Enum.TextXAlignment.Left,
+            Font = Enum.Font.GothamBold,
+            TextSize = 14
+        })
+        
+        local closeButton = b.New("TextButton", {
+            Size = UDim2.new(0, 30, 1, 0),
+            Position = UDim2.new(1, -30, 0, 0),
+            BackgroundColor3 = Color3.fromHex(b.Colors.Red),
+            BorderSizePixel = 0,
+            Text = "X",
+            TextColor3 = Color3.fromHex(b.Theme.Text),
+            Font = Enum.Font.GothamBold,
+            TextSize = 14
+        })
+        
+        local contentFrame = b.New("ScrollingFrame", {
+            Size = UDim2.new(1, -20, 1, -50),
+            Position = UDim2.new(0, 10, 0, 40),
+            BackgroundTransparency = 1,
+            BorderSizePixel = 0,
+            ScrollBarThickness = 4,
+            ScrollBarImageColor3 = Color3.fromHex(b.Theme.Accent),
+            CanvasSize = UDim2.new(0, 0, 0, 0),
+            AutomaticCanvasSize = Enum.AutomaticSize.Y
+        })
+        
+        -- 组装元素
+        titleBar.Parent = mainFrame
+        titleText.Parent = titleBar
+        closeButton.Parent = titleBar
+        contentFrame.Parent = mainFrame
+        mainFrame.Parent = screenGui
+        
+        -- 拖拽功能
+        b.Drag(mainFrame, {titleBar})
+        
+        -- 关闭按钮功能
+        closeButton.MouseButton1Click:Connect(function()
+            screenGui:Destroy()
+        end)
+        
+        return {
+            ScreenGui = screenGui,
+            MainFrame = mainFrame,
+            ContentFrame = contentFrame,
+            Close = function()
+                screenGui:Destroy()
+            end
+        }
+    end
+    
+    return b
+end
 
-    local tabContent = self:CreateElement("ScrollingFrame", {
-        Size = UDim2.new(1, 0, 1, -40),
-        Position = UDim2.new(0, 0, 0, 40),
-        BackgroundTransparency = 1,
-        BorderSizePixel = 0,
-        ScrollBarThickness = 4,
-        ScrollBarImageColor3 = self.Colors.Primary,
-        CanvasSize = UDim2.new(0, 0, 0, 0),
-        AutomaticCanvasSize = Enum.AutomaticSize.Y,
-        Visible = false
-    })
+-- 按钮组件
+function WindUI.c()
+    local b = WindUI.load("a")
+    
+    function b:CreateButton(text, callback)
+        local button = b.New("TextButton", {
+            Size = UDim2.new(1, 0, 0, 40),
+            BackgroundColor3 = Color3.fromHex(b.Theme.Button),
+            BorderColor3 = Color3.fromHex(b.Theme.Outline),
+            BorderSizePixel = 1,
+            Text = text,
+            TextColor3 = Color3.fromHex(b.Theme.Text),
+            Font = Enum.Font.Gotham,
+            TextSize = 12,
+            AutoButtonColor = false
+        })
+        
+        local corner = b.New("UICorner", {
+            CornerRadius = UDim.new(0, 4)
+        })
+        corner.Parent = button
+        
+        -- 悬停效果
+        button.MouseEnter:Connect(function()
+            b.Tween(button, 0.2, {
+                BackgroundColor3 = Color3.fromHex(b.Theme.Accent)
+            }):Play()
+        end)
+        
+        button.MouseLeave:Connect(function()
+            b.Tween(button, 0.2, {
+                BackgroundColor3 = Color3.fromHex(b.Theme.Button)
+            }):Play()
+        end)
+        
+        -- 点击效果
+        button.MouseButton1Click:Connect(function()
+            if callback then
+                callback()
+            end
+        end)
+        
+        return button
+    end
+    
+    return b
+end
 
-    local layout = self:CreateElement("UIListLayout", {
-        SortOrder = Enum.SortOrder.LayoutOrder,
-        Padding = UDim.new(0, 5)
-    })
-    layout.Parent = tabContent
+-- 标签组件
+function WindUI.d()
+    local b = WindUI.load("a")
+    
+    function b:CreateLabel(text, size)
+        local label = b.New("TextLabel", {
+            Size = size or UDim2.new(1, 0, 0, 20),
+            BackgroundTransparency = 1,
+            Text = text,
+            TextColor3 = Color3.fromHex(b.Theme.Text),
+            Font = Enum.Font.Gotham,
+            TextSize = 12,
+            TextXAlignment = Enum.TextXAlignment.Left
+        })
+        
+        return label
+    end
+    
+    return b
+end
 
-    return {
-        Button = tabButton,
-        Content = tabContent,
-        Active = false
-    }
+-- 切换开关组件
+function WindUI.e()
+    local b = WindUI.load("a")
+    
+    function b:CreateToggle(text, default, callback)
+        local toggleFrame = b.New("Frame", {
+            Size = UDim2.new(1, 0, 0, 30),
+            BackgroundTransparency = 1
+        })
+        
+        local label = b.New("TextLabel", {
+            Size = UDim2.new(0.7, 0, 1, 0),
+            BackgroundTransparency = 1,
+            Text = text,
+            TextColor3 = Color3.fromHex(b.Theme.Text),
+            Font = Enum.Font.Gotham,
+            TextSize = 12,
+            TextXAlignment = Enum.TextXAlignment.Left
+        })
+        
+        local toggleButton = b.New("TextButton", {
+            Size = UDim2.new(0, 40, 0, 20),
+            Position = UDim2.new(1, -40, 0.5, -10),
+            BackgroundColor3 = default and Color3.fromHex(b.Colors.Green) or Color3.fromHex(b.Theme.Button),
+            BorderSizePixel = 0,
+            Text = "",
+            AutoButtonColor = false
+        })
+        
+        local toggleCircle = b.New("Frame", {
+            Size = UDim2.new(0, 16, 0, 16),
+            Position = default and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8),
+            BackgroundColor3 = Color3.fromHex(b.Theme.Text),
+            BorderSizePixel = 0
+        })
+        
+        local corner1 = b.New("UICorner", {
+            CornerRadius = UDim.new(0, 10)
+        })
+        local corner2 = b.New("UICorner", {
+            CornerRadius = UDim.new(1, 0)
+        })
+        
+        corner1.Parent = toggleButton
+        corner2.Parent = toggleCircle
+        
+        label.Parent = toggleFrame
+        toggleButton.Parent = toggleFrame
+        toggleCircle.Parent = toggleButton
+        
+        local isToggled = default or false
+        
+        toggleButton.MouseButton1Click:Connect(function()
+            isToggled = not isToggled
+            
+            b.Tween(toggleCircle, 0.2, {
+                Position = isToggled and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)
+            }):Play()
+            
+            b.Tween(toggleButton, 0.2, {
+                BackgroundColor3 = isToggled and Color3.fromHex(b.Colors.Green) or Color3.fromHex(b.Theme.Button)
+            }):Play()
+            
+            if callback then
+                callback(isToggled)
+            end
+        end)
+        
+        return {
+            Frame = toggleFrame,
+            SetState = function(state)
+                isToggled = state
+                toggleCircle.Position = state and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)
+                toggleButton.BackgroundColor3 = state and Color3.fromHex(b.Colors.Green) or Color3.fromHex(b.Theme.Button)
+            end,
+            GetState = function()
+                return isToggled
+            end
+        }
+    end
+    
+    return b
+end
+
+-- 初始化WindUI
+function WindUI.Init()
+    WindUI.Core = WindUI.load("a")
+    WindUI.Window = WindUI.load("b")
+    WindUI.Button = WindUI.load("c")
+    WindUI.Label = WindUI.load("d")
+    WindUI.Toggle = WindUI.load("e")
+    
+    return WindUI
 end
 
 return WindUI]==])()
