@@ -1,4 +1,4 @@
--- WindUI.lua
+loadstring([==[-- WindUI.lua
 local WindUI = {}
 
 -- 颜色配置
@@ -419,4 +419,4 @@ function WindUI:CreateTab(text)
     }
 end
 
-return WindUI
+return WindUI]==])()
