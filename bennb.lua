@@ -12,7 +12,7 @@ local function showNotification(message)
         Title = "物品收集脚本",
         Text = message,
         Duration = 5,
-        Icon = "rbxassetid://0" -- 可以替换为其他图标ID
+        Icon = "rbxassetid://92410166181133" -- 可以替换为其他图标ID
     })
     print(message) -- 同时在输出窗口打印
 end
